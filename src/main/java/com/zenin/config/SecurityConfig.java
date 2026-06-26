@@ -25,13 +25,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -42,13 +39,6 @@ public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins:http://localhost:8081}")
     private List<String> corsAllowedOrigins;
-
-    @PostConstruct
-    public void logCorsConfig() {
-        log.info("===================================================");
-        log.info("🔒 CORS ALLOWED ORIGINS LIDOS: {}", corsAllowedOrigins);
-        log.info("===================================================");
-    }
 
     private static final String[] PUBLIC_PATHS = {
             "/api/auth/**",

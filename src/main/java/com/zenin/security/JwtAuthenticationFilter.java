@@ -24,6 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        // Se for uma requisição de preflight do CORS (OPTIONS), ignora este filtro completamente.
+        // Deixa o Spring Security e o CorsFilter nativo lidarem com ela.
+        return request.getMethod().equalsIgnoreCase("OPTIONS");
+    }
+    
+    @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,

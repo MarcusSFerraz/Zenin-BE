@@ -40,3 +40,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Trigger Easypanel Deploy
+        run: curl "${{ secrets.EASYPANEL_WEBHOOK_URL }}"

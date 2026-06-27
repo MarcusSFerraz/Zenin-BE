@@ -28,7 +28,7 @@ public class InvestimentoController {
     @Operation(summary = "Listar investimentos do usuário")
     public List<InvestimentoResponse> listar(@RequestParam(required = false) Boolean ativo,
                                               @AuthenticationPrincipal User usuario) {
-        return investimentoService.li   star(usuario, ativo).stream()
+        return investimentoService.listar(usuario, ativo).stream()
                 .map(InvestimentoResponse::from)
                 .toList();
     }

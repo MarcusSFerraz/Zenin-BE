@@ -48,6 +48,7 @@ public class FaturaCartaoService {
         FaturaCartao fatura = FaturaCartao.builder()
                 .usuario(usuario)
                 .carteira(carteira)
+                .mesReferencia(request.mesReferencia())
                 .dataVencimento(request.dataVencimento())
                 .valor(request.valor())
                 .pago(false)
@@ -68,6 +69,7 @@ public class FaturaCartaoService {
         }
 
         fatura.setCarteira(carteira);
+        fatura.setMesReferencia(request.mesReferencia());
         fatura.setDataVencimento(request.dataVencimento());
         fatura.setValor(request.valor());
 

@@ -30,6 +30,8 @@ public class TaxaInvestimento {
 
     private String nome;
 
+    private String referencia;
+
     @Column(name = "taxa_anual")
     private BigDecimal taxaAnual;
 

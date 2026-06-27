@@ -30,7 +30,10 @@ public class CarteiraService {
 
     @Transactional
     public Carteira criar(CarteiraRequest request, User usuario) {
-        BigDecimal saldoInicial = request.saldoInicial() != null ? request.saldoInicial() : BigDecimal.ZERO;
+        boolean temSaldo = request.cartaoDebito() || request.poupanca();
+        BigDecimal saldoInicial = (request.saldoInicial() != null && (temSaldo || !request.cartaoCredito()))
+                ? request.saldoInicial()
+                : BigDecimal.ZERO;
 
         Carteira carteira = Carteira.builder()
                 .usuario(usuario)
@@ -39,6 +42,9 @@ public class CarteiraService {
                 .saldoInicial(saldoInicial)
                 .saldoAtual(saldoInicial)
                 .cartaoCredito(request.cartaoCredito())
+                .cartaoDebito(request.cartaoDebito())
+                .poupanca(request.poupanca())
+                .diaVencimento(request.diaVencimento())
                 .build();
 
         return carteiraRepository.save(carteira);
@@ -51,6 +57,9 @@ public class CarteiraService {
         carteira.setNome(request.nome());
         if (request.cor() != null) carteira.setCor(request.cor());
         carteira.setCartaoCredito(request.cartaoCredito());
+        carteira.setCartaoDebito(request.cartaoDebito());
+        carteira.setPoupanca(request.poupanca());
+        carteira.setDiaVencimento(request.diaVencimento());
 
         return carteiraRepository.save(carteira);
     }

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public record FaturaCartaoResponse(
         UUID id,
+        String mesReferencia,
         BigDecimal valor,
         LocalDate dataVencimento,
         boolean pago,
@@ -18,7 +19,7 @@ public record FaturaCartaoResponse(
 ) {
     public static FaturaCartaoResponse from(FaturaCartao f) {
         return new FaturaCartaoResponse(
-                f.getId(), f.getValor(), f.getDataVencimento(), f.isPago(),
+                f.getId(), f.getMesReferencia(), f.getValor(), f.getDataVencimento(), f.isPago(),
                 CarteiraResumo.from(f.getCarteira()),
                 f.getCriadoEm(), f.getAtualizadoEm()
         );

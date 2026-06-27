@@ -9,13 +9,17 @@ import java.util.UUID;
 public record CarteiraResponse(
         UUID id, String nome, String cor,
         BigDecimal saldoInicial, BigDecimal saldoAtual,
-        boolean cartaoCredito, OffsetDateTime criadoEm, OffsetDateTime atualizadoEm
+        boolean cartaoCredito, boolean cartaoDebito, boolean poupanca,
+        Integer diaVencimento,
+        OffsetDateTime criadoEm, OffsetDateTime atualizadoEm
 ) {
     public static CarteiraResponse from(Carteira c) {
         return new CarteiraResponse(
                 c.getId(), c.getNome(), c.getCor(),
                 c.getSaldoInicial(), c.getSaldoAtual(),
-                c.isCartaoCredito(), c.getCriadoEm(), c.getAtualizadoEm()
+                c.isCartaoCredito(), c.isCartaoDebito(), c.isPoupanca(),
+                c.getDiaVencimento(),
+                c.getCriadoEm(), c.getAtualizadoEm()
         );
     }
 }

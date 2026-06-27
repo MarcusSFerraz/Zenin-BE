@@ -43,6 +43,17 @@ public class Carteira {
     @Builder.Default
     private boolean cartaoCredito = false;
 
+    @Column(name = "dia_vencimento")
+    private Integer diaVencimento;
+
+    @Column(name = "cartao_debito", nullable = false)
+    @Builder.Default
+    private boolean cartaoDebito = false;
+
+    @Column(name = "poupanca", nullable = false)
+    @Builder.Default
+    private boolean poupanca = false;
+
     @Column(name = "criado_em")
     private OffsetDateTime criadoEm;
 

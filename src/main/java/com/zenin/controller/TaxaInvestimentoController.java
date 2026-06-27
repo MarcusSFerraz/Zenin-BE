@@ -1,6 +1,7 @@
 package com.zenin.controller;
 
 import com.zenin.dto.request.TaxaInvestimentoRequest;
+import com.zenin.dto.request.TaxaInvestimentoUpsertRequest;
 import com.zenin.dto.response.TaxaInvestimentoResponse;
 import com.zenin.service.TaxaInvestimentoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/admin/taxas-investimento")
@@ -40,6 +42,14 @@ public class TaxaInvestimentoController {
         return TaxaInvestimentoResponse.from(taxaInvestimentoService.buscar(id));
     }
 
+    @GetMapping("/referencia/{referencia}")
+    @Operation(summary = "Buscar taxas por referência")
+    public List<TaxaInvestimentoResponse> buscarPorReferencia(@PathVariable String referencia) {
+        return taxaInvestimentoService.buscarPorReferencia(referencia).stream()
+                .map(TaxaInvestimentoResponse::from)
+                .toList();
+    }
+
     @PostMapping
     @Operation(summary = "Cadastrar taxa de investimento")
     public ResponseEntity<TaxaInvestimentoResponse> criar(@Valid @RequestBody TaxaInvestimentoRequest request) {
@@ -59,5 +69,13 @@ public class TaxaInvestimentoController {
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         taxaInvestimentoService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/atualizaAtivos")
+    @Operation(summary = "Criar ou atualizar taxas em lote pelo rate_type")
+    public List<TaxaInvestimentoResponse> atualizaAtivos(@RequestBody List<TaxaInvestimentoUpsertRequest> requests) {
+        return taxaInvestimentoService.upsertBulk(requests).stream()
+                .map(TaxaInvestimentoResponse::from)
+                .toList();
     }
 }

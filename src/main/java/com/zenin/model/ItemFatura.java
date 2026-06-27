@@ -9,13 +9,13 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "faturas_cartao")
+@Table(name = "itens_fatura")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FaturaCartao {
+public class ItemFatura {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,26 +23,21 @@ public class FaturaCartao {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fatura_id", nullable = false)
+    private FaturaCartao fatura;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private User usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "carteira_id", nullable = false)
-    private Carteira carteira;
-
-    @Column(name = "mes_referencia", length = 7)
-    private String mesReferencia;
-
-    @Column(name = "data_vencimento", nullable = false)
-    private LocalDate dataVencimento;
+    @Column(nullable = false)
+    private String descricao;
 
     @Column(nullable = false, precision = 15, scale = 2)
-    @Builder.Default
-    private BigDecimal valor = BigDecimal.ZERO;
+    private BigDecimal valor;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean pago = false;
+    @Column(name = "data_compra")
+    private LocalDate dataCompra;
 
     @Column(name = "criado_em")
     private OffsetDateTime criadoEm;

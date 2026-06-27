@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public record TaxaInvestimentoRequest(
         @NotBlank(message = "Tipo é obrigatório") String tipo,
         String nome,
+        String referencia,
         BigDecimal taxaAnual,
         @NotNull(message = "Taxa diária é obrigatória") BigDecimal taxaDiaria,
         BigDecimal puVenda,

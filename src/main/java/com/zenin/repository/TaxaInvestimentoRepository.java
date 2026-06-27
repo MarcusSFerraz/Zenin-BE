@@ -12,4 +12,6 @@ public interface TaxaInvestimentoRepository extends JpaRepository<TaxaInvestimen
     List<TaxaInvestimento> findByTipo(String tipo);
     Optional<TaxaInvestimento> findByTipoAndDataReferencia(String tipo, LocalDate dataReferencia);
     Optional<TaxaInvestimento> findTopByTipoOrderByDataReferenciaDesc(String tipo);
+    List<TaxaInvestimento> findByReferencia(String referencia);
+    Optional<TaxaInvestimento> findFirstByReferencia(String referencia);
 }

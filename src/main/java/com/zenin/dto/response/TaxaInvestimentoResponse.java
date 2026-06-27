@@ -11,6 +11,7 @@ public record TaxaInvestimentoResponse(
         UUID id,
         String tipo,
         String nome,
+        String referencia,
         BigDecimal taxaAnual,
         BigDecimal taxaDiaria,
         BigDecimal puVenda,
@@ -21,7 +22,7 @@ public record TaxaInvestimentoResponse(
 ) {
     public static TaxaInvestimentoResponse from(TaxaInvestimento t) {
         return new TaxaInvestimentoResponse(
-                t.getId(), t.getTipo(), t.getNome(), t.getTaxaAnual(), t.getTaxaDiaria(),
+                t.getId(), t.getTipo(), t.getNome(), t.getReferencia(), t.getTaxaAnual(), t.getTaxaDiaria(),
                 t.getPuVenda(), t.getPuBase(), t.getVencimento(), t.getDataReferencia(), t.getCriadoEm()
         );
     }

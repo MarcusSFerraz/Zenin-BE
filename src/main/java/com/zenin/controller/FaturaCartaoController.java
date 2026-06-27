@@ -1,9 +1,12 @@
 package com.zenin.controller;
 
 import com.zenin.dto.request.FaturaCartaoRequest;
+import com.zenin.dto.request.ItemFaturaRequest;
 import com.zenin.dto.response.FaturaCartaoResponse;
+import com.zenin.dto.response.ItemFaturaResponse;
 import com.zenin.model.User;
 import com.zenin.service.FaturaCartaoService;
+import com.zenin.service.ItemFaturaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class FaturaCartaoController {
 
     private final FaturaCartaoService faturaCartaoService;
+    private final ItemFaturaService itemFaturaService;
 
     @GetMapping
     @Operation(summary = "Listar faturas", description = "Filtrar por ?carteiraId= ou ?pago=true/false")
@@ -69,6 +73,41 @@ public class FaturaCartaoController {
     @Operation(summary = "Excluir fatura")
     public ResponseEntity<Void> deletar(@PathVariable UUID id, @AuthenticationPrincipal User usuario) {
         faturaCartaoService.deletar(id, usuario);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/itens")
+    @Operation(summary = "Listar itens da fatura")
+    public List<ItemFaturaResponse> listarItens(@PathVariable UUID id, @AuthenticationPrincipal User usuario) {
+        return itemFaturaService.listar(id, usuario).stream()
+                .map(ItemFaturaResponse::from)
+                .toList();
+    }
+
+    @PostMapping("/{id}/itens")
+    @Operation(summary = "Adicionar item à fatura")
+    public ResponseEntity<ItemFaturaResponse> adicionarItem(@PathVariable UUID id,
+                                                             @Valid @RequestBody ItemFaturaRequest request,
+                                                             @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ItemFaturaResponse.from(itemFaturaService.criar(id, request, usuario)));
+    }
+
+    @PutMapping("/{id}/itens/{itemId}")
+    @Operation(summary = "Atualizar item da fatura")
+    public ItemFaturaResponse atualizarItem(@PathVariable UUID id,
+                                             @PathVariable UUID itemId,
+                                             @Valid @RequestBody ItemFaturaRequest request,
+                                             @AuthenticationPrincipal User usuario) {
+        return ItemFaturaResponse.from(itemFaturaService.atualizar(id, itemId, request, usuario));
+    }
+
+    @DeleteMapping("/{id}/itens/{itemId}")
+    @Operation(summary = "Remover item da fatura")
+    public ResponseEntity<Void> removerItem(@PathVariable UUID id,
+                                             @PathVariable UUID itemId,
+                                             @AuthenticationPrincipal User usuario) {
+        itemFaturaService.deletar(id, itemId, usuario);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,10 +11,13 @@ import java.util.UUID;
 
 public record MetaResponse(
         UUID id,
+        UUID investimentoId,
         String nome,
         BigDecimal valorAlvo,
         BigDecimal valorAtual,
         double percentualAtingido,
+        BigDecimal totalDepositosManual,
+        BigDecimal totalInvestimento,
         TipoPeriodo periodo,
         LocalDate dataInicio,
         LocalDate dataFim,
@@ -23,16 +26,30 @@ public record MetaResponse(
         CategoriaResponse categoria,
         OffsetDateTime criadoEm
 ) {
-    public static MetaResponse from(Meta m) {
+    public static MetaResponse from(Meta m, BigDecimal totalDepositosManual, BigDecimal totalInvestimento) {
         double percentual = BigDecimal.ZERO.compareTo(m.getValorAlvo()) == 0 ? 0.0
                 : m.getValorAtual().divide(m.getValorAlvo(), 4, RoundingMode.HALF_UP).doubleValue() * 100;
 
         return new MetaResponse(
-                m.getId(), m.getNome(), m.getValorAlvo(), m.getValorAtual(),
-                Math.min(percentual, 100.0), m.getPeriodo(),
-                m.getDataInicio(), m.getDataFim(), m.getCor(), m.getIcone(),
+                m.getId(),
+                m.getInvestimento() != null ? m.getInvestimento().getId() : null,
+                m.getNome(),
+                m.getValorAlvo(),
+                m.getValorAtual(),
+                Math.min(percentual, 100.0),
+                totalDepositosManual,
+                totalInvestimento,
+                m.getPeriodo(),
+                m.getDataInicio(),
+                m.getDataFim(),
+                m.getCor(),
+                m.getIcone(),
                 CategoriaResponse.from(m.getCategoria()),
                 m.getCriadoEm()
         );
+    }
+
+    public static MetaResponse from(Meta m) {
+        return from(m, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 }

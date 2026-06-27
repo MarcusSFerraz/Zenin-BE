@@ -30,6 +30,10 @@ public class Meta {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "investimento_id")
+    private Investimento investimento;
+
     @Column(nullable = false)
     private String nome;
 

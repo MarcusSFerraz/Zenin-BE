@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface MetaRepository extends JpaRepository<Meta, UUID> {
 
-    @EntityGraph(attributePaths = {"categoria"})
+    @EntityGraph(attributePaths = {"categoria", "investimento"})
     List<Meta> findByUsuarioId(UUID usuarioId);
 
-    @EntityGraph(attributePaths = {"categoria"})
+    @EntityGraph(attributePaths = {"categoria", "investimento"})
     Optional<Meta> findByIdAndUsuarioId(UUID id, UUID usuarioId);
 }

@@ -27,9 +27,7 @@ public class MetaController {
     @GetMapping
     @Operation(summary = "Listar metas do usuário")
     public List<MetaResponse> listar(@AuthenticationPrincipal User usuario) {
-        return metaService.listar(usuario).stream()
-                .map(MetaResponse::from)
-                .toList();
+        return metaService.listar(usuario);
     }
 
     @GetMapping("/{id}")

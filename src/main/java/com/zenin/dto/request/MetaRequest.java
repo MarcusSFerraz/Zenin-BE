@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public record MetaRequest(
         UUID categoriaId,
+        UUID investimentoId,
         @NotBlank(message = "Nome é obrigatório") String nome,
         @NotNull(message = "Valor alvo é obrigatório") @Positive(message = "Valor deve ser positivo") BigDecimal valorAlvo,
         @NotNull(message = "Período é obrigatório") TipoPeriodo periodo,

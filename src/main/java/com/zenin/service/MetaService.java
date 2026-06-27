@@ -1,18 +1,25 @@
 package com.zenin.service;
 
 import com.zenin.dto.request.MetaRequest;
+import com.zenin.dto.response.MetaResponse;
 import com.zenin.model.Categoria;
+import com.zenin.model.Investimento;
 import com.zenin.model.Meta;
 import com.zenin.model.User;
+import com.zenin.repository.AporteMetaRepository;
 import com.zenin.repository.CategoriaRepository;
+import com.zenin.repository.InvestimentoRepository;
 import com.zenin.repository.MetaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +27,29 @@ public class MetaService {
 
     private final MetaRepository metaRepository;
     private final CategoriaRepository categoriaRepository;
+    private final InvestimentoRepository investimentoRepository;
+    private final AporteMetaRepository aporteMetaRepository;
 
-    public List<Meta> listar(User usuario) {
-        return metaRepository.findByUsuarioId(usuario.getId());
+    public List<MetaResponse> listar(User usuario) {
+        List<Meta> metas = metaRepository.findByUsuarioId(usuario.getId());
+        if (metas.isEmpty()) return List.of();
+
+        List<UUID> metaIds = metas.stream().map(Meta::getId).toList();
+        Map<UUID, BigDecimal> totalAportesMap = aporteMetaRepository.sumByMetaIds(metaIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (UUID) row[0],
+                        row -> (BigDecimal) row[1]
+                ));
+
+        return metas.stream()
+                .map(m -> {
+                    BigDecimal totalAportes = totalAportesMap.getOrDefault(m.getId(), BigDecimal.ZERO);
+                    BigDecimal totalInvestimento = m.getInvestimento() != null
+                            ? m.getInvestimento().getValorAtual()
+                            : BigDecimal.ZERO;
+                    return MetaResponse.from(m, totalAportes, totalInvestimento);
+                })
+                .toList();
     }
 
     public Meta buscar(UUID id, User usuario) {
@@ -42,9 +69,16 @@ public class MetaService {
                     .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada"));
         }
 
+        Investimento investimento = null;
+        if (request.investimentoId() != null) {
+            investimento = investimentoRepository.findByIdAndUsuarioId(request.investimentoId(), usuario.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
+        }
+
         Meta meta = Meta.builder()
                 .usuario(usuario)
                 .categoria(categoria)
+                .investimento(investimento)
                 .nome(request.nome())
                 .valorAlvo(request.valorAlvo())
                 .periodo(request.periodo())
@@ -71,7 +105,14 @@ public class MetaService {
                     .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada"));
         }
 
+        Investimento investimento = null;
+        if (request.investimentoId() != null) {
+            investimento = investimentoRepository.findByIdAndUsuarioId(request.investimentoId(), usuario.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
+        }
+
         meta.setCategoria(categoria);
+        meta.setInvestimento(investimento);
         meta.setNome(request.nome());
         meta.setValorAlvo(request.valorAlvo());
         meta.setPeriodo(request.periodo());

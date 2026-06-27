@@ -67,9 +67,6 @@ public class InvestimentoService {
                 .ativo(true)
                 .build();
 
-        carteira.setSaldoAtual(carteira.getSaldoAtual().subtract(valorInicial));
-        carteiraRepository.save(carteira);
-
         return investimentoRepository.save(investimento);
     }
 

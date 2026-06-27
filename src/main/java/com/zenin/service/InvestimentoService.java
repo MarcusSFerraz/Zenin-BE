@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -50,21 +51,23 @@ public class InvestimentoService {
         }
 
         LocalDate dataInicio = request.dataInicio() != null ? request.dataInicio() : LocalDate.now();
+        BigDecimal valorInicial = calcularValorInicial(request, taxa);
+        BigDecimal quantidadeCotas = calcularQuantidadeCotas(request, taxa);
 
         Investimento investimento = Investimento.builder()
                 .usuario(usuario)
                 .carteira(carteira)
                 .taxa(taxa)
                 .tipo(request.tipo())
-                .valorInicial(request.valorInicial())
-                .valorAtual(request.valorInicial())
-                .quantidadeCotas(request.quantidadeCotas() != null ? request.quantidadeCotas() : BigDecimal.ZERO)
+                .valorInicial(valorInicial)
+                .valorAtual(valorInicial)
+                .quantidadeCotas(quantidadeCotas != null ? quantidadeCotas : BigDecimal.ZERO)
                 .dataInicio(dataInicio)
                 .dataVencimento(request.dataVencimento())
                 .ativo(true)
                 .build();
 
-        carteira.setSaldoAtual(carteira.getSaldoAtual().subtract(request.valorInicial()));
+        carteira.setSaldoAtual(carteira.getSaldoAtual().subtract(valorInicial));
         carteiraRepository.save(carteira);
 
         return investimentoRepository.save(investimento);
@@ -80,12 +83,39 @@ public class InvestimentoService {
                     .orElseThrow(() -> new EntityNotFoundException("Taxa de investimento não encontrada"));
         }
 
+        BigDecimal valorInicial = calcularValorInicial(request, taxa);
+        BigDecimal quantidadeCotas = calcularQuantidadeCotas(request, taxa);
+
         investimento.setTaxa(taxa);
         investimento.setTipo(request.tipo());
+        investimento.setValorInicial(valorInicial);
+        investimento.setValorAtual(valorInicial);
         investimento.setDataVencimento(request.dataVencimento());
-        if (request.quantidadeCotas() != null) investimento.setQuantidadeCotas(request.quantidadeCotas());
+        if (quantidadeCotas != null) investimento.setQuantidadeCotas(quantidadeCotas);
 
         return investimentoRepository.save(investimento);
+    }
+
+    private BigDecimal calcularValorInicial(InvestimentoRequest request, TaxaInvestimento taxa) {
+        if (request.quantidadeCotas() != null
+                && taxa != null
+                && taxa.getPuVenda() != null) {
+            return request.quantidadeCotas().multiply(taxa.getPuVenda());
+        }
+        return request.valorInicial();
+    }
+
+    private BigDecimal calcularQuantidadeCotas(InvestimentoRequest request, TaxaInvestimento taxa) {
+        if (request.quantidadeCotas() != null) {
+            return request.quantidadeCotas();
+        }
+        if (taxa != null
+                && taxa.getPuVenda() != null
+                && taxa.getPuVenda().compareTo(BigDecimal.ZERO) != 0
+                && request.valorInicial() != null) {
+            return request.valorInicial().divide(taxa.getPuVenda(), 8, RoundingMode.HALF_UP);
+        }
+        return null;
     }
 
     @Transactional

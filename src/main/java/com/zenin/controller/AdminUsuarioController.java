@@ -34,6 +34,12 @@ public class AdminUsuarioController {
         return adminUsuarioService.buscarPorId(id);
     }
 
+    @GetMapping("/whatsapp/{numero}")
+    @Operation(summary = "Buscar usuário pelo número de WhatsApp")
+    public UsuarioAdminResponse buscarPorWhatsapp(@PathVariable String numero) {
+        return adminUsuarioService.buscarPorWhatsapp(numero);
+    }
+
     @PatchMapping("/{id}")
     @Operation(summary = "Atualizar role e/ou status ativo do usuário")
     public UsuarioAdminResponse atualizar(@PathVariable UUID id,

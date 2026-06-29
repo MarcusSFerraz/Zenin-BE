@@ -23,6 +23,12 @@ public class AdminUsuarioService {
                 .toList();
     }
 
+    public UsuarioAdminResponse buscarPorWhatsapp(String numeroWhatsapp) {
+        User user = userRepository.findByNumeroWhatsapp(numeroWhatsapp)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com WhatsApp: " + numeroWhatsapp));
+        return UsuarioAdminResponse.from(user);
+    }
+
     public UsuarioAdminResponse buscarPorId(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado: " + id));

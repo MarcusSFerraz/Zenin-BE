@@ -53,6 +53,9 @@ public class User implements UserDetails {
     @Column(name = "numero_whatsapp")
     private String numeroWhatsapp;
 
+    @Column(name = "carteira_id_padrao")
+    private UUID carteiraIdPadrao;
+
     @Builder.Default
     private Boolean ativo = false;
 

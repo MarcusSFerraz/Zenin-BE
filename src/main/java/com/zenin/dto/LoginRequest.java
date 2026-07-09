@@ -10,5 +10,7 @@ public record LoginRequest(
         String email,
 
         @NotBlank(message = "Senha é obrigatória")
-        String password
+        String password,
+
+        Boolean rememberMe
 ) {}

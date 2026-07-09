@@ -13,14 +13,16 @@ public record PerfilResponse(
         Integer diaPagamento,
         String numeroWhatsapp,
         Boolean ativo,
-        String role
+        String role,
+        UUID carteiraIdPadrao
 ) {
     public static PerfilResponse from(User u) {
         return new PerfilResponse(
                 u.getId(), u.getEmail(), u.getName(),
                 u.getUrlAvatar(), u.getPreferenciaTema(),
                 u.getDiaPagamento(), u.getNumeroWhatsapp(),
-                u.getAtivo(), u.getRole().name()
+                u.getAtivo(), u.getRole().name(),
+                u.getCarteiraIdPadrao()
         );
     }
 }

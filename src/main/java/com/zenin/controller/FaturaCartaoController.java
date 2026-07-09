@@ -2,11 +2,14 @@ package com.zenin.controller;
 
 import com.zenin.dto.request.FaturaCartaoRequest;
 import com.zenin.dto.request.ItemFaturaRequest;
+import com.zenin.dto.request.LancamentoFaturaRequest;
 import com.zenin.dto.response.FaturaCartaoResponse;
 import com.zenin.dto.response.ItemFaturaResponse;
+import com.zenin.dto.response.LancamentoFaturaResponse;
 import com.zenin.model.User;
 import com.zenin.service.FaturaCartaoService;
 import com.zenin.service.ItemFaturaService;
+import com.zenin.service.LancamentoFaturaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,6 +30,7 @@ public class FaturaCartaoController {
 
     private final FaturaCartaoService faturaCartaoService;
     private final ItemFaturaService itemFaturaService;
+    private final LancamentoFaturaService lancamentoFaturaService;
 
     @GetMapping
     @Operation(summary = "Listar faturas", description = "Filtrar por ?carteiraId= ou ?pago=true/false")
@@ -108,6 +112,42 @@ public class FaturaCartaoController {
                                              @PathVariable UUID itemId,
                                              @AuthenticationPrincipal User usuario) {
         itemFaturaService.deletar(id, itemId, usuario);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/lancamentos")
+    @Operation(summary = "Listar lançamentos da fatura")
+    public List<LancamentoFaturaResponse> listarLancamentos(@PathVariable UUID id,
+                                                             @AuthenticationPrincipal User usuario) {
+        return lancamentoFaturaService.listar(id, usuario).stream()
+                .map(LancamentoFaturaResponse::from)
+                .toList();
+    }
+
+    @PostMapping("/{id}/lancamentos")
+    @Operation(summary = "Adicionar lançamento à fatura")
+    public ResponseEntity<LancamentoFaturaResponse> adicionarLancamento(@PathVariable UUID id,
+                                                                         @Valid @RequestBody LancamentoFaturaRequest request,
+                                                                         @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(LancamentoFaturaResponse.from(lancamentoFaturaService.criar(id, request, usuario)));
+    }
+
+    @PutMapping("/{id}/lancamentos/{lancamentoId}")
+    @Operation(summary = "Atualizar lançamento da fatura")
+    public LancamentoFaturaResponse atualizarLancamento(@PathVariable UUID id,
+                                                         @PathVariable UUID lancamentoId,
+                                                         @Valid @RequestBody LancamentoFaturaRequest request,
+                                                         @AuthenticationPrincipal User usuario) {
+        return LancamentoFaturaResponse.from(lancamentoFaturaService.atualizar(id, lancamentoId, request, usuario));
+    }
+
+    @DeleteMapping("/{id}/lancamentos/{lancamentoId}")
+    @Operation(summary = "Remover lançamento da fatura")
+    public ResponseEntity<Void> removerLancamento(@PathVariable UUID id,
+                                                   @PathVariable UUID lancamentoId,
+                                                   @AuthenticationPrincipal User usuario) {
+        lancamentoFaturaService.deletar(id, lancamentoId, usuario);
         return ResponseEntity.noContent().build();
     }
 }

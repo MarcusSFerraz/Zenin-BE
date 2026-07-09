@@ -2,7 +2,9 @@ package com.zenin.service;
 
 import com.zenin.dto.request.PerfilUpdateRequest;
 import com.zenin.model.User;
+import com.zenin.repository.CarteiraRepository;
 import com.zenin.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class PerfilService {
 
     private final UserRepository userRepository;
+    private final CarteiraRepository carteiraRepository;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -45,6 +49,16 @@ public class PerfilService {
         }
         if (request.numeroWhatsapp() != null) {
             usuario.setNumeroWhatsapp(request.numeroWhatsapp());
+        }
+        if (request.carteiraIdPadrao() != null) {
+            if (request.carteiraIdPadrao().isEmpty()) {
+                usuario.setCarteiraIdPadrao(null);
+            } else {
+                UUID carteiraId = request.carteiraIdPadrao().get();
+                carteiraRepository.findByIdAndUsuarioId(carteiraId, usuario.getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Carteira não encontrada ou não pertence ao usuário"));
+                usuario.setCarteiraIdPadrao(carteiraId);
+            }
         }
         return userRepository.save(usuario);
     }

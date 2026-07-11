@@ -18,4 +18,7 @@ public interface TransacaoRecorrenteRepository extends JpaRepository<TransacaoRe
 
     @EntityGraph(attributePaths = {"carteira", "categoria"})
     Optional<TransacaoRecorrente> findByIdAndUsuarioId(UUID id, UUID usuarioId);
+
+    @EntityGraph(attributePaths = {"carteira", "categoria", "usuario"})
+    List<TransacaoRecorrente> findAllByAtivo(boolean ativo);
 }

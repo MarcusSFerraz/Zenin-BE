@@ -8,6 +8,7 @@ import com.zenin.repository.TransacaoRecorrenteRepository;
 import com.zenin.repository.TransacaoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransacaoRecorrenteService {
@@ -138,5 +140,46 @@ public class TransacaoRecorrenteService {
         }
 
         return geradas;
+    }
+
+    @Transactional
+    public int processarTodasRecorrencias() {
+        LocalDate hoje = LocalDate.now();
+        LocalDate inicioMes = hoje.withDayOfMonth(1);
+        LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
+
+        List<TransacaoRecorrente> ativas = transacaoRecorrenteRepository.findAllByAtivo(true);
+        int count = 0;
+
+        for (TransacaoRecorrente recorrente : ativas) {
+            boolean jaProcessada = !transacaoRepository
+                    .findByTransacaoRecorrenteIdAndDataBetween(recorrente.getId(), inicioMes, fimMes)
+                    .isEmpty();
+
+            if (jaProcessada) continue;
+
+            int dia = recorrente.getDiaVencimento() != null
+                    ? Math.min(recorrente.getDiaVencimento(), fimMes.getDayOfMonth())
+                    : 1;
+
+            Transacao transacao = Transacao.builder()
+                    .usuario(recorrente.getUsuario())
+                    .carteira(recorrente.getCarteira())
+                    .categoria(recorrente.getCategoria())
+                    .transacaoRecorrente(recorrente)
+                    .tipo(recorrente.getTipo())
+                    .valor(recorrente.getValor())
+                    .descricao("Recorrência: " + recorrente.getNome())
+                    .data(inicioMes.withDayOfMonth(dia))
+                    .dataVencimento(inicioMes.withDayOfMonth(dia))
+                    .pago(false)
+                    .build();
+
+            transacaoRepository.save(transacao);
+            log.debug("Transação gerada: recorrencia={} usuario={}", recorrente.getId(), recorrente.getUsuario().getId());
+            count++;
+        }
+
+        return count;
     }
 }

@@ -94,6 +94,13 @@ public class TransacaoService {
                     .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada"));
         }
 
+        TransacaoRecorrente transacaoRecorrente = null;
+        if (request.transacaoRecorrenteId() != null) {
+            transacaoRecorrente = transacaoRecorrenteRepository
+                    .findByIdAndUsuarioId(request.transacaoRecorrenteId(), usuario.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Transação recorrente não encontrada"));
+        }
+
         // Reverte impacto da transação anterior se estava paga
         if (transacao.isPago()) {
             reverterSaldoCarteira(transacao.getCarteira(), transacao.getTipo(), transacao.getValor());
@@ -102,6 +109,7 @@ public class TransacaoService {
 
         transacao.setCarteira(novaCarteira);
         transacao.setCategoria(categoria);
+        transacao.setTransacaoRecorrente(transacaoRecorrente);
         transacao.setTipo(request.tipo());
         transacao.setValor(request.valor());
         transacao.setDescricao(request.descricao());

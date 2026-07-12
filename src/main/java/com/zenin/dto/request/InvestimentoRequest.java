@@ -15,5 +15,6 @@ public record InvestimentoRequest(
         @NotNull(message = "Valor inicial é obrigatório") @Positive(message = "Valor deve ser positivo") BigDecimal valorInicial,
         BigDecimal quantidadeCotas,
         LocalDate dataInicio,
-        @NotNull(message = "Data de vencimento é obrigatória") LocalDate dataVencimento
+        @NotNull(message = "Data de vencimento é obrigatória") LocalDate dataVencimento,
+        Boolean deduzirCarteira
 ) {}

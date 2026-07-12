@@ -16,6 +16,7 @@ public record MetaResponse(
         BigDecimal valorAlvo,
         BigDecimal valorAtual,
         double percentualAtingido,
+        BigDecimal valorInicial,
         BigDecimal totalDepositosManual,
         BigDecimal totalInvestimento,
         TipoPeriodo periodo,
@@ -27,16 +28,20 @@ public record MetaResponse(
         OffsetDateTime criadoEm
 ) {
     public static MetaResponse from(Meta m, BigDecimal totalDepositosManual, BigDecimal totalInvestimento) {
+        BigDecimal valorInicial = m.getValorInicial() != null ? m.getValorInicial() : BigDecimal.ZERO;
+        BigDecimal valorAtual = valorInicial.add(totalDepositosManual).add(totalInvestimento);
+
         double percentual = BigDecimal.ZERO.compareTo(m.getValorAlvo()) == 0 ? 0.0
-                : m.getValorAtual().divide(m.getValorAlvo(), 4, RoundingMode.HALF_UP).doubleValue() * 100;
+                : valorAtual.divide(m.getValorAlvo(), 4, RoundingMode.HALF_UP).doubleValue() * 100;
 
         return new MetaResponse(
                 m.getId(),
                 m.getInvestimento() != null ? m.getInvestimento().getId() : null,
                 m.getNome(),
                 m.getValorAlvo(),
-                m.getValorAtual(),
+                valorAtual,
                 Math.min(percentual, 100.0),
+                valorInicial,
                 totalDepositosManual,
                 totalInvestimento,
                 m.getPeriodo(),

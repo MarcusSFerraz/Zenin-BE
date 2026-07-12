@@ -2,14 +2,8 @@ package com.zenin.service;
 
 import com.zenin.dto.request.MetaRequest;
 import com.zenin.dto.response.MetaResponse;
-import com.zenin.model.Categoria;
-import com.zenin.model.Investimento;
-import com.zenin.model.Meta;
-import com.zenin.model.User;
-import com.zenin.repository.AporteMetaRepository;
-import com.zenin.repository.CategoriaRepository;
-import com.zenin.repository.InvestimentoRepository;
-import com.zenin.repository.MetaRepository;
+import com.zenin.model.*;
+import com.zenin.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +23,7 @@ public class MetaService {
     private final CategoriaRepository categoriaRepository;
     private final InvestimentoRepository investimentoRepository;
     private final AporteMetaRepository aporteMetaRepository;
+    private final CarteiraRepository carteiraRepository;
 
     public List<MetaResponse> listar(User usuario) {
         List<Meta> metas = metaRepository.findByUsuarioId(usuario.getId());
@@ -57,6 +52,19 @@ public class MetaService {
                 .orElseThrow(() -> new EntityNotFoundException("Meta não encontrada"));
     }
 
+    public MetaResponse buscarResponse(UUID id, User usuario) {
+        Meta meta = buscar(id, usuario);
+        return toFullResponse(meta);
+    }
+
+    private MetaResponse toFullResponse(Meta meta) {
+        BigDecimal totalAportes = aporteMetaRepository.sumByMetaId(meta.getId());
+        BigDecimal totalInvestimento = meta.getInvestimento() != null
+                ? meta.getInvestimento().getValorAtual()
+                : BigDecimal.ZERO;
+        return MetaResponse.from(meta, totalAportes, totalInvestimento);
+    }
+
     @Transactional
     public Meta criar(MetaRequest request, User usuario) {
         if (request.dataFim().isBefore(request.dataInicio())) {
@@ -75,12 +83,26 @@ public class MetaService {
                     .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
         }
 
+        BigDecimal valorInicial = request.valorInicial() != null ? request.valorInicial() : BigDecimal.ZERO;
+
+        boolean deduct = !Boolean.FALSE.equals(request.deduzirCarteira());
+        if (deduct && request.carteiraId() != null && valorInicial.compareTo(BigDecimal.ZERO) > 0) {
+            Carteira carteira = carteiraRepository.findByIdAndUsuarioId(request.carteiraId(), usuario.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Carteira não encontrada"));
+            if (carteira.getSaldoAtual().compareTo(valorInicial) < 0) {
+                throw new IllegalArgumentException("Saldo insuficiente na carteira");
+            }
+            carteira.setSaldoAtual(carteira.getSaldoAtual().subtract(valorInicial));
+            carteiraRepository.save(carteira);
+        }
+
         Meta meta = Meta.builder()
                 .usuario(usuario)
                 .categoria(categoria)
                 .investimento(investimento)
                 .nome(request.nome())
                 .valorAlvo(request.valorAlvo())
+                .valorInicial(valorInicial)
                 .periodo(request.periodo())
                 .dataInicio(request.dataInicio())
                 .dataFim(request.dataFim())

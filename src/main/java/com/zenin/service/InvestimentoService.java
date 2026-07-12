@@ -54,6 +54,13 @@ public class InvestimentoService {
         BigDecimal valorInicial = calcularValorInicial(request, taxa);
         BigDecimal quantidadeCotas = calcularQuantidadeCotas(request, taxa);
 
+        boolean deduct = !Boolean.FALSE.equals(request.deduzirCarteira());
+        if (deduct) {
+            if (carteira.getSaldoAtual().compareTo(valorInicial) < 0) {
+                throw new IllegalArgumentException("Saldo insuficiente na carteira");
+            }
+        }
+
         Investimento investimento = Investimento.builder()
                 .usuario(usuario)
                 .carteira(carteira)
@@ -67,7 +74,14 @@ public class InvestimentoService {
                 .ativo(true)
                 .build();
 
-        return investimentoRepository.save(investimento);
+        investimentoRepository.save(investimento);
+
+        if (deduct) {
+            carteira.setSaldoAtual(carteira.getSaldoAtual().subtract(valorInicial));
+            carteiraRepository.save(carteira);
+        }
+
+        return investimento;
     }
 
     @Transactional

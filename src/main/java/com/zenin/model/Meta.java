@@ -44,6 +44,10 @@ public class Meta {
     @Builder.Default
     private BigDecimal valorAtual = BigDecimal.ZERO;
 
+    @Column(name = "valor_inicial", precision = 15, scale = 2)
+    @Builder.Default
+    private BigDecimal valorInicial = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoPeriodo periodo;

@@ -24,4 +24,7 @@ public interface AporteMetaRepository extends JpaRepository<AporteMeta, UUID> {
 
     @Query("SELECT am.meta.id, COALESCE(SUM(am.valor), 0) FROM AporteMeta am WHERE am.meta.id IN :metaIds GROUP BY am.meta.id")
     List<Object[]> sumByMetaIds(@Param("metaIds") List<UUID> metaIds);
+
+    @Query("SELECT COALESCE(SUM(am.valor), 0) FROM AporteMeta am WHERE am.meta.id = :metaId")
+    BigDecimal sumByMetaId(@Param("metaId") UUID metaId);
 }
